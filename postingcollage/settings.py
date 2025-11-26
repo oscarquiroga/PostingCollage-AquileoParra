@@ -82,6 +82,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'postingcollage.wsgi.application'
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Estas fuerzan el uso de cookies seguras, lo cual es vital
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://aquileoparra-periodico-escolar.onrender.com", 
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
