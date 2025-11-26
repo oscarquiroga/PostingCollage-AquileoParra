@@ -12,7 +12,7 @@ if [ -z "$SUPERUSER_PASSWORD" ]; then
 else
 
     python manage.py createsuperuser --noinput \
-        --username OscarAdmin \
+        --username oscaradmin \
         --email oscarquiroga@gmail.com
     
 
