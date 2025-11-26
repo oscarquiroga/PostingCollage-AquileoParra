@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg">
+        <div style="background-color: #800020;" class="card-header text-white">
+            <h4 class="mb-0">Actualizar Publicación</h4>
+        </div>
+        
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.media }}
+
+                <!-- Título -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Título:</label>
+                    {{ form.title }}
+                </div>
+
+                <!-- Contenido (CKEditor) -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Contenido:</label>
+                    {{ form.body }}
+                </div>
+
+                <!-- Imagen -->
+                {% if post.imgs %}
+                <div class="text-center mb-4">
+                    <img 
+                        src="{{ post.imgs.url }}" 
+                        class="img-fluid rounded shadow-sm"
+                        style="max-width: 350px;"
+                    >
+                </div>
+                {% endif %}
+
+                <!-- Etiquetas -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Etiquetas:</label>
+                    <p>{{ post.tags|default:"No asignadas" }}</p>
+                </div>
+
+                <!-- Links -->
+                {% if post.links %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Enlaces:</label>
+                    <pre>{{ post.links }}</pre>
+                </div>
+                {% endif %}
+
+                <!-- Archivos -->
+                {% if post.attachment %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Archivo adjunto:</label><br>
+                    <a href="{{ post.attachment.url }}" class="btn btn-sm btn-outline-primary" download>
+                        Descargar archivo
+                    </a>
+                </div>
+                {% endif %}
+
+                <hr class="my-4">
+
+                <!-- Estado -->
+                <div class="mb-3">
+                    {% if post.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% elif post.status == 'approved' %}
+                        <span class="badge bg-success">Aprobado</span>
+                    {% elif post.status == 'rejected' %}
+                        <span class="badge bg-danger">Rechazado</span>
+                    {% endif %}
+                </div>
+
+                <!-- Feedback -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Feedback:</label>
+                    <p>{{ post.feedback|default:"Sin comentarios aún" }}</p>
+                </div>
+
+                <!-- Siempre mantener pendiente -->
+                <input type="hidden" name="status" value="pending">
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success px-4">
+                        Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

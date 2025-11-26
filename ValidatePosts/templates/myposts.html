@@ -1,0 +1,50 @@
+    {% extends "base.html" %}
+    {% block content %}
+
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Mis Publicaciones</h2>
+        {% if posts %}
+        <div class="row g-4">
+
+                {% for post in posts %}
+                <div class="col-md-6 col-lg-4">
+                    <a href="{% url 'actualizar' post.id %}" class="card shadow-sm h-100">
+
+                        {% if post.imgs %}
+                        <img src="{{ post.imgs.url }}" class="card-img-top" alt="Imagen del post">
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">
+                                {{ post.body|truncatewords:20 }}
+                            </p>
+
+                            <p>
+                                <span class="badge 
+                                    {% if post.status == 'approved' %} bg-success 
+                                    {% elif post.status == 'rejected' %} bg-danger 
+                                    {% else %} bg-warning text-dark {% endif %}">
+                                    {{ post.status|title }}
+                                </span>
+                            </p>
+
+                            {% if post.feedback %}
+                                <p><strong>Feedback:</strong> {{ post.feedback }}</p>
+                            {% endif %}
+
+                        </div>
+
+                    </a>
+                </div>
+                {% endfor %}
+
+        </div>
+
+        {% else %}
+            <p class="text-center mt-4 text-muted">Aún no has creado publicaciones.</p>
+        {% endif %}
+
+    </div>
+
+    {% endblock %}

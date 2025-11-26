@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    /* Texto de preview con altura fija para evitar romper el layout */
+    .post-preview-text {
+        height: 45px;          /* Ajusta si quieres más o menos texto */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* Para evitar que cambien las alturas en la columna derecha */
+    .small-card-img {
+        height: 100px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .small-card-body {
+        min-height: 100px;
+    }
+
+</style>
+
+<div class="container mt-4">
+
+    <!-- SECCIÓN PRINCIPAL -->
+    <div class="row g-4">
+
+        <!-- COLUMNA IZQUIERDA - POST DESTACADO -->
+        <div class="col-lg-8">
+
+            {% with featured=posts|first %}
+            {% if featured %}
+            <a href="{% url 'view_post' featured.id %}" class="card text-white shadow-lg position-relative">
+
+                {% if featured.imgs %}
+                <img src="{{ featured.imgs.url }}" class="card-img" style="height:420px; object-fit:cover;">
+                {% else %}
+                <div class="bg-dark d-flex align-items-center justify-content-center" 
+                     style="height:420px;">
+                    <h2 class="text-white">Sin imagen</h2>
+                </div>
+                {% endif %}
+
+                <div class="card-img-overlay d-flex flex-column justify-content-end"
+                     style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                    <span class="badge bg-danger mb-2">DESTACADO</span>
+                    <h2 class="fw-bold">{{ featured.title }}</h2>
+
+                    <!-- FIX: strip html + truncar + altura controlada -->
+                    <p class="text-light post-preview-text">
+                        {{ featured.body|striptags|truncatewords:20 }}
+                    </p>
+                </div>
+            </a>
+            {% endif %}
+            {% endwith %}
+
+        </div>
+
+        <!-- COLUMNA DERECHA - POSTS PEQUEÑOS -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+
+            {% for post in posts|slice:"1:4" %}
+            <a href="{% url 'view_post' post.id %}" class="card shadow-sm text-decoration-none text-dark">
+                <div class="row g-0">
+
+                    <!-- Imagen -->
+                    <div class="col-4">
+                        {% if post.imgs %}
+                        <img src="{{ post.imgs.url }}" class="img-fluid rounded-start small-card-img">
+                        {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center small-card-img">
+                            Sin imagen
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Texto -->
+                    <div class="col-8">
+                        <div class="card-body py-2 small-card-body">
+                            <span class="badge bg-primary mb-1">POST</span>
+
+                            <h6 class="fw-bold">{{ post.title|truncatechars:50 }}</h6>
+
+                            <!-- FIX: strip html -->
+                            <p class="small text-muted mb-0 post-preview-text">
+                                {{ post.body|striptags|truncatewords:12 }}
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </a>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <!-- SECCIÓN DE TARJETAS DE NOTICIAS -->
+    <div class="row mt-5 g-4">
+        {% for post in posts|slice:"4:" %}
+        <div class="col-md-4">
+            <a href="{% url 'view_post' post.id %}" class="card shadow-sm h-100 text-decoration-none text-dark">
+
+                {% if post.imgs %}
+                <img src="{{ post.imgs.url }}" class="card-img-top" style="height:180px; object-fit:cover;">
+                {% else %}
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center"
+                     style="height:180px;">
+                    Sin imagen
+                </div>
+                {% endif %}
+
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ post.title|truncatechars:60 }}</h5>
+
+                    <!-- FIX: sin html -->
+                    <p class="text-muted post-preview-text">
+                        {{ post.body|striptags|truncatewords:18 }}
+                    </p>
+                </div>
+
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

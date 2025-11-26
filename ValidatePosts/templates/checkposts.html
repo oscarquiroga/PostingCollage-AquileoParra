@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container d mt-4">
+
+    <h3 class="mb-4">Publicaciones pendientes de revisión</h3>
+    <div class="container mt-4">
+
+    <div class="btn-group mb-4 d-flex">
+
+        <a href="?estado=pending" 
+           class="btn btn-warning {% if estado == 'pending' %}active{% endif %}">
+           Pendientes
+        </a>
+
+        <a href="?estado=approved" 
+           class="btn btn-success {% if estado == 'approved' %}active{% endif %}">
+           Aprobados
+        </a>
+
+        <a href="?estado=rejected" 
+           class="btn btn-danger {% if estado == 'rejected' %}active{% endif %}">
+           Rechazados
+        </a>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        {% for post in posts %}
+        <div class="col-12">
+            <a href="{% url 'review' post.id %}" class="text-decoration-none text-dark">
+
+                <div class="card shadow-sm hover-shadow" style="transition: 0.2s;">
+                    
+                    <!-- Header -->
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">{{ post.user.username }}</span>
+
+                        <span class="
+                            badge 
+                            {% if post.status == 'pending' %} bg-warning text-dark
+                            {% elif post.status == 'approved' %} bg-success
+                            {% elif post.status == 'rejected' %} bg-danger
+                            {% endif %}
+                        ">
+                            {{ post.status }}
+                        </span>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text text-muted">
+                            {{ post.body|truncatechars:130 }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </a>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- Pequeño CSS para hover -->
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+</style>
+
+{% endblock %}

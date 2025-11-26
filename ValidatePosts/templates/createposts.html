@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="card shadow-lg">
+                <div style="background-color: #800020;" class="card-header text-white py-3">
+                    <h4 class="mb-0">📝 Crear Nueva Publicación</h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.media }}
+                        <!-- Titulo -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Título</label>
+                            {{ form.title }}
+                        </div>
+
+                        <!-- Cuerpo -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Contenido</label>
+                            {{ form.body }}
+                        </div>
+
+                        <!-- Imagen -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Imagen</label>
+                            {{ form.imgs }}
+                            <small class="form-text text-muted">
+                                Puedes subir imágenes JPG o PNG.
+                            </small>
+                        </div>
+
+                        <!-- Etiquetas -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Etiquetas</label>
+                            {{ form.tags }}
+                            <small class="text-muted">
+                                Escribe varias etiquetas separadas por comas. Ejemplo:  
+                                <span class="badge bg-secondary">deportes</span>
+                                <span class="badge bg-secondary">ciencia</span>
+                                <span class="badge bg-secondary">colegio</span>
+                            </small>
+                        </div>
+
+                        <!-- Botón enviar -->
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                Publicar
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

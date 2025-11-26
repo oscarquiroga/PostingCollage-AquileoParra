@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .about-header {
+        background: linear-gradient(135deg, #720026, #a0003a);
+        color: white;
+        padding: 50px 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        color: #720026;
+        border-left: 5px solid #720026;
+        padding-left: 10px;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+
+    .justification-box {
+        background: #fff8fa;
+        border: 1px solid #e5c3ce;
+        padding: 20px;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Encabezado -->
+    <div class="about-header shadow-lg">
+        <h1 class="fw-bold">Sobre el Proyecto</h1>
+        <p class="mt-2">
+            Una plataforma creada para fortalecer la comunicación escolar y promover el pensamiento crítico.
+        </p>
+    </div>
+
+    <!-- Sección 1 -->
+    <div class="mb-5">
+        <h3 class="section-title">📣 Comunicación y Participación Estudiantil</h3>
+        <p>
+            Este proyecto nace con la necesidad de brindar a los estudiantes un espacio donde puedan expresarse 
+            libremente, compartir ideas, informar acontecimientos y participar activamente en la vida escolar. 
+            La plataforma funciona como un medio digital donde cualquier estudiante puede contribuir con artículos, 
+            noticias, reportajes o reflexiones personales.
+        </p>
+        <p>
+            Además, permite que los docentes supervisen el contenido publicado para asegurar la calidad, la 
+            veracidad y el cumplimiento de los valores institucionales.
+        </p>
+    </div>
+
+    <!-- Sección 2 -->
+    <div class="mb-5">
+        <h3 class="section-title">📰 Impulso al Periodismo Escolar</h3>
+        <p>
+            La herramienta fomenta el desarrollo de habilidades periodísticas como la investigación, 
+            redacción, edición y presentación de información. Los estudiantes aprenden a comunicar 
+            de manera clara, organizada y objetiva, fortaleciendo su capacidad de análisis y expresión.
+        </p>
+        <p>
+            Esto no solo prepara a los jóvenes para competencias académicas, sino que los acerca al mundo 
+            profesional del periodismo y la comunicación digital.
+        </p>
+    </div>
+
+    <!-- Sección 3 -->
+    <div class="mb-5">
+        <h3 class="section-title">✍️ Desarrollo de Competencias de Escritura e Investigación</h3>
+        <p>
+            La plataforma incentiva la búsqueda de fuentes, el pensamiento crítico y el trabajo colaborativo. 
+            Cada publicación pasa por un proceso de revisión docente donde el estudiante recibe 
+            retroalimentación que le permite mejorar sus textos y sus habilidades comunicativas.
+        </p>
+    </div>
+
+    <!-- ENLACE A DOCUMENTACIÓN -->
+    <div class="text-center mt-5 mb-4">
+        <a href="/media/Documentacion.pdf" target="_blank" class="btn btn-outline-primary btn-lg">
+            📄 Ver Documentación del Proyecto (PDF)
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

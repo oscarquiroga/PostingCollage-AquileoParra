@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body.dark-mode .sidebar {
+    background: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #eee !important;
+}
+
+body.dark-mode .sidebar h5,
+body.dark-mode .sidebar h6 {
+    color: #fff !important;
+}
+
+body.dark-mode .sidebar p,
+body.dark-mode .sidebar strong {
+    color: #ddd !important;
+}
+
+body.dark-mode .badge.bg-secondary {
+    background-color: #555 !important;
+}
+
+/* Botón para mostrar sidebar */
+body.dark-mode #showSidebarBtn {
+    background: #b3003c !important;
+    color: white !important;
+}
+
+/* Botón para ocultar sidebar */
+body.dark-mode #hideSidebarBtn {
+    background: #b3003c !important;
+    color: white !important;
+}
+
+/* Texto del artículo */
+body.dark-mode .article-body,
+body.dark-mode .article-title,
+body.dark-mode .article-section-title {
+    color: #e5e5e5 !important;
+}
+
+/* Card de feedback y reacciones */
+body.dark-mode .article-box {
+    border-color: #444 !important;
+}
+
+body.dark-mode .text-muted {
+    color: #bbb !important;
+}
+
+    .newspaper-title {
+        font-family: 'Georgia', serif;
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        letter-spacing: 3px;
+        margin-top: 20px;
+    }
+
+    .newspaper-subtitle {
+        text-align: center;
+        font-style: italic;
+        color: #555;
+        margin-bottom: 30px;
+    }
+
+    .article-title {
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    .article-section-title {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #777;
+    }
+
+    .article-body {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        text-align: justify;
+    }
+
+    .newspaper-image {
+        width: 100%;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+
+    .article-box {
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+        margin-top: 25px;
+    }
+    .article-layout {
+    display: flex;
+}
+
+/* Cuando el sidebar está oculto */
+.article-layout {
+    gap: 1.5rem;
+}
+
+/* Cuando esté oculto el sidebar */
+.article-layout.sidebar-hidden {
+    grid-template-columns: 1fr 0px;
+}
+
+/* Sidebar */
+.sidebar {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    width: 30vw;
+}
+
+/* Sidebar oculto */
+.sidebar.hidden {
+    opacity: 0;
+    padding: 0;
+    border: none;
+}
+.texto{
+    width: 60vw;
+}
+.texto.oppen{
+    width: 80vw;
+}
+/* Botón flotante para mostrar el sidebar */
+#showSidebarBtn {
+    position: fixed;
+    top: 120px;
+    right: 10px; /* AHORA A LA DERECHA */
+    z-index: 999;
+    background: #800020;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Botón dentro del sidebar para ocultarlo */
+#hideSidebarBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* AHORA EN EL LADO IZQUIERDO DEL SIDEBAR */
+    background: #800020;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+@media (max-width: 800px) {
+    .article-layout{
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    .texto{
+        width: 100%;
+    }
+    .sidebar{
+        width: 100%;
+    }
+    #hideSidebarBtn {
+        display: none;
+    }
+}
+</style>
+
+<div class="container">
+    
+
+    <!-- TÍTULO DEL PERIÓDICO -->
+    <div class="newspaper-title">AQUILEO PARA I.E.D</div>
+    <div class="newspaper-subtitle">El Periódico Escolar</div>
+    
+<button id="showSidebarBtn" title="Mostrar menú">☰</button>
+
+<div class="article-box">
+    <h6 class="article-section-title">Vistas</h6>
+    <p>👁️ {{ post.views }} vistas  //  👍 {{ post.likes.count }} likes</p>
+    <p></p>
+</div>
+
+<div class="article-layout" id="articleLayout">
+
+    
+    
+    <!-- SECCIÓN PRINCIPAL DEL ARTÍCULO -->
+    <div>
+        
+        <div class="texto" id="texto">
+            
+            <h2 class="article-title">
+                {{ post.title }}
+            </h2>
+            
+            <p class="article-section-title">
+                Publicado por {{ post.user.username }} · {{ post.created_at|date:"d M Y" }}
+            </p>
+            
+            {% if post.imgs %}
+            <img src="{{ post.imgs.url }}" class="newspaper-image">
+            {% endif %}
+            
+            <p class="article-body">
+                {{ post.body|safe }}
+            </p>
+
+        </div>
+        
+    </div>
+    
+        <!-- SIDEBAR DERECHA -->
+        <aside class="sidebar" id="sidebar">
+        <button id="hideSidebarBtn" title="Ocultar">×</button>
+
+        <h5 class="fw-bold">Etiquetas</h5>
+        {% if tags %}
+            {% for tag in tags %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No hay etiquetas</p>
+        {% endif %}
+
+        <hr>
+
+        <h6 class="fw-bold">Información</h6>
+        <p><strong>Autor:</strong> {{ post.user.username }}</p>
+        <p><strong>Fecha:</strong> {{ post.created_at|date:"d M Y" }}</p>
+        <!-- Feedback -->
+            {% if post.feedback %}
+            <div class="article-box">
+                <h6 class="article-section-title">Comentario Editorial</h6>
+                <p>{{ post.feedback }}</p>
+            </div>
+            {% endif %}
+            <div class="article-box">
+    <h6 class="article-section-title">Reacciones</h6>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'toggle_like' post.id %}" class="btn btn-outline-primary btn-sm">
+            {% if user_liked %}
+                Quitar Like
+            {% else %}
+                Dar Like
+            {% endif %}
+        </a>
+    {% else %}
+        <small class="text-muted">Inicia sesión para dar like</small>
+    {% endif %}
+</div>
+    </aside>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const layout = document.getElementById("articleLayout");
+    const sidebar = document.getElementById("sidebar");
+    const showBtn = document.getElementById("showSidebarBtn");
+    const hideBtn = document.getElementById("hideSidebarBtn");
+    const texto = document.getElementById("texto");
+
+    // Ocultar sidebar
+    hideBtn.addEventListener("click", () => {
+        sidebar.classList.add("hidden");
+        layout.classList.add("sidebar-hidden");
+        showBtn.style.display = "flex";
+        texto.classList.add("oppen")
+    });
+
+    // Mostrar sidebar
+    showBtn.addEventListener("click", () => {
+        sidebar.classList.remove("hidden");
+        layout.classList.remove("sidebar-hidden");
+        showBtn.style.display = "none";
+        texto.classList.remove("oppen")
+    });
+
+    // Por defecto sidebar visible
+    showBtn.style.display = "none";
+});
+</script>
+{% endblock %}

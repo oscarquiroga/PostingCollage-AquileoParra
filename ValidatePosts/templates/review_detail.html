@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg">
+        <div style="background-color: #800020;" class="card-header text-white">
+            <h4 class="mb-0">Revisión de Publicación</h4>
+        </div>
+        
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.media }}
+                <!-- Autor -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Autor:</label>
+                    <p class="form-control-plaintext">{{ form.user.username }}</p>
+                </div>
+
+                <!-- Título -->
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">Título:</label>
+                    {{ form.title }}
+
+                <!-- Cuerpo -->
+                <div class="mb-3">
+                 <label class="form-label fw-bold">Contenido:</label>
+                {{ form.body }}
+                </div>
+
+
+                <!-- Imagen -->
+                {% if post.imgs %}
+                <div class="text-center mb-4">
+                    <img 
+                        src="{{ post.imgs.url }}" 
+                        class="img-fluid rounded shadow-sm"
+                        style="max-width: 350px;"
+                    >
+                </div>
+                {% endif %}
+
+                <hr class="my-4">
+
+                <!-- Estado -->
+                <div class="mb-3">
+                    <label for="status" class="form-label fw-bold">Estado:</label>
+                    <select class="form-select" name="status" id="status">
+                        <option value="pending"  {% if post.status == "pending" %}selected{% endif %}>Pendiente</option>
+                        <option value="approved" {% if post.status == "approved" %}selected{% endif %}>Aprobado</option>
+                        <option value="rejected" {% if post.status == "rejected" %}selected{% endif %}>Rechazado</option>
+                    </select>
+                </div>
+
+                <!-- Feedback -->
+                <div class="mb-3">
+                    <label for="feedback" class="form-label fw-bold">Feedback:</label>
+                    <textarea 
+                        class="form-control"
+                        name="feedback" 
+                        id="feedback" 
+                        rows="5"
+                    >{{ post.feedback }}</textarea>
+                </div>
+
+                <!-- Botón Guardar -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success px-4">
+                        Guardar cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

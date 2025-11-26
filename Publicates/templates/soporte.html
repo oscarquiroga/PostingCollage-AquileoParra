@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container" style="max-width: 600px; margin-top: 40px;">
+
+    <div class="card shadow-lg p-4">
+        <h3 class="fw-bold mb-3 text-center">📩 Contacto de Soporte</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Título del problema</label><br>
+                {{ form.title }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Descripción</label><br>
+                {{ form.description }}
+            </div>
+
+            <button class="btn btn-primary w-100">Enviar Soporte</button>
+        </form>
+
+        {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
