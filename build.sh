@@ -16,5 +16,5 @@ else
         --email oscarquiroga@gmail.com
     
 
-    echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.get(username='OscarAdmin').set_password('$SUPERUSER_PASSWORD'); User.objects.get(username='OscarAdmin').save()" | python manage.py shell
+    echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.get(username='oscaradmin').set_password('$SUPERUSER_PASSWORD'); User.objects.get(username='oscaradmin').save()" | python manage.py shell
 fi
