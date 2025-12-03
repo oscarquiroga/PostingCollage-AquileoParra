@@ -20,6 +20,7 @@ class ReviewPostForm(forms.ModelForm):
             "status": forms.Select(attrs={"class": "form-select"}),
             "feedback": forms.Textarea(attrs={"class": "form-control"}),
         }
+
 class PostForm(forms.ModelForm):
     title = forms.CharField(
         max_length=255,
@@ -30,10 +31,16 @@ class PostForm(forms.ModelForm):
         })
     )
 
-    imgs = forms.ImageField(
+    imgs = forms.FileField(     # antes ImageField
         required=False,
         widget=forms.ClearableFileInput(attrs={"class": "form-control"})
     )
+
+    attachment = forms.FileField(  # para subir PDFs, docs, etc.
+        required=False,
+        widget=forms.ClearableFileInput(attrs={"class": "form-control"})
+    )
+
     tags = forms.CharField(
         required=False,
         label="Etiquetas",
@@ -42,6 +49,7 @@ class PostForm(forms.ModelForm):
             "placeholder": "Ej: deportes, ciencia, concursos"
         })
     )
+
     class Meta:
         model = Post
         fields = ["title", "body", "imgs", "tags", "links", "attachment", "video_url"]

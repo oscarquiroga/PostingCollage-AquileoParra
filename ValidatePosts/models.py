@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django_ckeditor_5.fields import CKEditor5Field
+from cloudinary.models import CloudinaryField
 
 User = settings.AUTH_USER_MODEL
 
@@ -14,7 +15,10 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(max_length=255)
     body = CKEditor5Field(config_name="default")
-    imgs = models.ImageField(upload_to="posts/images/", null=True, blank=True)
+
+    # CAMPO DE IMAGEN → CLOUDINARY
+    imgs = CloudinaryField("image", folder="posts/images", null=True, blank=True)
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     feedback = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,9 +27,10 @@ class Post(models.Model):
 
     links = models.TextField(null=True, blank=True, help_text="Ingresa enlaces separados por una nueva línea")
 
-    attachment = models.FileField(upload_to="posts/files/", null=True, blank=True)
+    attachment = CloudinaryField("file", folder="posts/files", null=True, blank=True)
 
     video_url = models.URLField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.title} - {self.user.username}"
 

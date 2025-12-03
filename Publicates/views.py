@@ -11,9 +11,6 @@ import os
 
 def home(request):
     print(default_storage)
-    print("CLOUD_NAME:", os.getenv("CLOUDINARY_CLOUD_NAME"))
-    print("API_KEY:", os.getenv("CLOUDINARY_API_KEY"))
-    print("API_SECRET exists:", os.getenv("CLOUDINARY_API_SECRET") is not   None)
     posts = Post.objects.filter(status="approved").annotate(
         likes_count=Count("likes")
     ).order_by("-likes_count", "-created_at")
