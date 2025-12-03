@@ -72,6 +72,12 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
 
+cloudinary.config( 
+  cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+  api_key=os.getenv('CLOUDINARY_API_KEY'),
+  api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 ROOT_URLCONF = 'postingcollage.urls'
@@ -125,10 +131,11 @@ CKEDITOR_5_CONFIGS = {
             "link", "imageUpload", "mediaEmbed", "|",
             "undo", "redo",
         ],
-        "height": "500px",
-        "width": "100%",
+        "image_backend": "cloudinary",
+        "upload_path": "posts/",
     }
 }
+
 
 CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any"
