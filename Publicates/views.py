@@ -11,6 +11,7 @@ import os
 
 def home(request):
     print(default_storage)
+    print("CLOUDINARY_URL:", os.getenv("CLOUDINARY_URL"))
     posts = Post.objects.filter(status="approved").annotate(
         likes_count=Count("likes")
     ).order_by("-likes_count", "-created_at")
