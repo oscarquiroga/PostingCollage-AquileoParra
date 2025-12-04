@@ -6,12 +6,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from ValidatePosts.models import Post, Like
 from django.db.models import Count, F, Q
 from django.contrib.auth.decorators import login_required
-from django.core.files.storage import default_storage
-import os
 
 def home(request):
-    print(default_storage)
-    print("CLOUDINARY_URL:", os.getenv("CLOUDINARY_URL"))
     posts = Post.objects.filter(status="approved").annotate(
         likes_count=Count("likes")
     ).order_by("-likes_count", "-created_at")
