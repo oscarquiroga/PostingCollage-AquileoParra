@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import re_path
+from postingcollage import debug_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,6 +27,8 @@ urlpatterns = [
     path("", include("Publicates.urls")),
     path("publicaciones/", include("ValidatePosts.urls")),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
+    # Diagnostic URL: temporary endpoint to test Cloudinary upload from runtime
+    re_path(r'^__debug__/cloudinary_test_upload/$', debug_views.cloudinary_test_upload),
 ]
 
 if settings.DEBUG:
