@@ -192,44 +192,50 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuración de Cloudinary
-# Opción 1: Usando CLOUDINARY_URL (recomendado para Render)
+# Configuración de Cloudinary (REQUIERE `CLOUDINARY_URL` en producción)
+# Use una sola variable de entorno con el formato:
+#   CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
 CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
 
-# Opción 2: Usando variables separadas (local)
-CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
-CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
-CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
-
-# Validar que Cloudinary esté configurado
-if CLOUDINARY_URL or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
-    # Configurar Cloudinary con las variables de entorno
-    if CLOUDINARY_URL:
-        # Si está disponible CLOUDINARY_URL, se configura automáticamente
-        cloudinary.config(secure=True)
-    else:
-        # Si usa variables separadas
-        cloudinary.config(
-            cloud_name=CLOUDINARY_CLOUD_NAME,
-            api_key=CLOUDINARY_API_KEY,
-            api_secret=CLOUDINARY_API_SECRET,
-            secure=True
-        )
-    # Almacenamiento de archivos con Cloudinary
+# Forzar uso de CLOUDINARY_URL cuando DEBUG=False (producción)
+if CLOUDINARY_URL:
+    # cloudinary.config() leerá CLOUDINARY_URL automáticamente
+    cloudinary.config(secure=True)
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    # Asegurar que django-cloudinary-storage tenga la configuración esperada
     try:
         cfg = cloudinary.config()
+        # No imprimimos secretos; mostramos solo lo necesario para depuración
+        masked_key = (cfg.api_key[:4] + '...' + cfg.api_key[-4:]) if cfg.api_key else 'None'
         CLOUDINARY_STORAGE = {
             'CLOUD_NAME': cfg.cloud_name,
             'API_KEY': cfg.api_key,
-            'API_SECRET': cfg.api_secret,
+            'API_SECRET': '***MASKED***',
+            'SECURE': True,
         }
-    except Exception:
+        # Poner MEDIA_URL al CDN de Cloudinary para que CKEditor y templates apunten al CDN
+        try:
+            MEDIA_URL = f"https://res.cloudinary.com/{cfg.cloud_name}/"
+            CLOUDINARY_STORAGE['MEDIA_URL'] = MEDIA_URL
+        except Exception:
+            MEDIA_URL = '/media/'
+        # Prints de diagnóstico (NO exponen el api_secret)
+        print(f"✅ CLOUDINARY_URL encontrada. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
+        print(f"✅ DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
+    except Exception as e:
+        print("❌ Error al configurar cloudinary:", str(e))
         CLOUDINARY_STORAGE = {}
 else:
-    # Fallback a almacenamiento local si Cloudinary no está configurado
-    print("⚠️  ADVERTENCIA: Variables de Cloudinary no configuradas. Usando almacenamiento local.")
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-MEDIA_URL = '/media/'
+    msg = (
+        "CLOUDINARY_URL not set. Configure an environment variable: "
+        "CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>"
+    )
+    if DEBUG:
+        # En desarrollo permitimos fallback local, pero lo notificamos claramente
+        print("⚠️  " + msg + " Falling back to local FileSystemStorage because DEBUG=True.")
+        DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+        MEDIA_URL = '/media/'
+    else:
+        # En producción debe existir CLOUDINARY_URL: fallar rápido para ver el error en deploy
+        raise RuntimeError(msg)
+
 MEDIA_ROOT = BASE_DIR / 'media'
