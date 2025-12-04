@@ -187,11 +187,9 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'doyltixiz',
-    'API_KEY': '',
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
-}
+cloudinary.config(
+    secure=True
+)
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
