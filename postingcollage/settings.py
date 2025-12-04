@@ -217,6 +217,16 @@ if CLOUDINARY_URL or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINAR
         )
     # Almacenamiento de archivos con Cloudinary
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    # Asegurar que django-cloudinary-storage tenga la configuración esperada
+    try:
+        cfg = cloudinary.config()
+        CLOUDINARY_STORAGE = {
+            'CLOUD_NAME': cfg.cloud_name,
+            'API_KEY': cfg.api_key,
+            'API_SECRET': cfg.api_secret,
+        }
+    except Exception:
+        CLOUDINARY_STORAGE = {}
 else:
     # Fallback a almacenamiento local si Cloudinary no está configurado
     print("⚠️  ADVERTENCIA: Variables de Cloudinary no configuradas. Usando almacenamiento local.")
