@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import cloudinary.uploader
+import cloudinary
+import os
 
 logger = logging.getLogger('django')
 
@@ -37,9 +39,35 @@ def ckeditor_upload(request):
         # Read file content
         file_content = uploaded_file.read()
         
-        # Upload to Cloudinary using the SDK directly
-        # This bypasses django-cloudinary-storage which may have issues
+        # Ensure Cloudinary SDK is configured in this process (helps in some PaaS cases)
         try:
+            cfg = cloudinary.config()
+        except Exception:
+            cfg = None
+
+        if not (cfg and getattr(cfg, 'api_secret', None)):
+            # Attempt to parse CLOUDINARY_URL environment variable as a fallback
+            cloudinary_url = os.environ.get('CLOUDINARY_URL')
+            if cloudinary_url and cloudinary_url.startswith('cloudinary://'):
+                try:
+                    # Format: cloudinary://api_key:api_secret@cloud_name
+                    url_part = cloudinary_url.replace('cloudinary://', '', 1)
+                    creds_part, cn = url_part.rsplit('@', 1)
+                    ak, as_ = creds_part.split(':', 1)
+                    cloudinary.config(cloud_name=cn, api_key=ak, api_secret=as_, secure=True)
+                    cfg = cloudinary.config()
+                except Exception as e:
+                    logger.error(f"[CKEditor Upload] Failed to parse CLOUDINARY_URL: {str(e)}")
+
+        # Upload to Cloudinary using the SDK directly. This bypasses django-cloudinary-storage.
+        try:
+            # Log non-sensitive config diagnostic
+            try:
+                cfg = cloudinary.config()
+                logger.info(f"[CKEditor Upload] cloud_name={getattr(cfg, 'cloud_name', None)}, api_key_present={bool(getattr(cfg, 'api_key', None))}")
+            except Exception:
+                logger.info("[CKEditor Upload] cloudinary.config() unavailable")
+
             result = cloudinary.uploader.upload(
                 file_content,
                 folder='posts/ckeditor',
@@ -58,10 +86,19 @@ def ckeditor_upload(request):
         except Exception as upload_error:
             error_msg = str(upload_error)
             logger.error(f"[CKEditor Upload] Cloudinary upload failed: {error_msg}")
-            
+
+            # If the error mentions an invalid signature, include guidance in the response
+            help_msg = 'Cloudinary upload failed.'
+            if 'Invalid Signature' in error_msg or 'signature' in error_msg.lower():
+                help_msg = (
+                    'Cloudinary reported an invalid signature. Verifica que la variable de entorno '
+                    'CLOUDINARY_URL esté correctamente configurada en producción (sin comillas ni espacios). '
+                    'Reinicia el servicio después de cambiar variables de entorno.'
+                )
+
             return JsonResponse({
                 'error': {
-                    'message': f'Cloudinary upload failed: {error_msg}'
+                    'message': f'{help_msg} ({error_msg})'
                 }
             }, status=500)
     
