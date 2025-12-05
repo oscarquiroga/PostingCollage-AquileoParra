@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load post_filters %}
 {% block content %}
 
 <div class="container d mt-4">
@@ -53,7 +54,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ post.title }}</h5>
                         <p class="card-text text-muted">
-                            {{ post.body|striptags|truncatechars:130 }}
+                            {{ post.body|clean_html|truncatechars:130 }}
                         </p>
                     </div>
 
