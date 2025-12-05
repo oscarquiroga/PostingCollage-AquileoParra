@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
-from postingcollage import ckeditor_handler
+from postingcollage import ckeditor_handler, error_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,6 +31,10 @@ urlpatterns = [
     path("ckeditor5/", include('django_ckeditor_5.urls')),
     # (production) ckeditor upload handler is registered above
 ]
+
+# Custom error handlers for production (redirect to home on errors)
+handler404 = 'postingcollage.error_views.handler404'
+handler500 = 'postingcollage.error_views.handler500'
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
