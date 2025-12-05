@@ -248,15 +248,15 @@ if CLOUDINARY_URL:
             except (ValueError, AttributeError, TypeError):
                 MEDIA_URL = '/media/'
             # Prints de diagnóstico (NO exponen el api_secret)
-            print(f"✅ CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
-            print(f"✅ DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
+            print(f"[OK] CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
+            print(f"[OK] DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
         except (ValueError, AttributeError, TypeError) as e:
-            print("❌ Error al configurar cloudinary:", str(e))
+            print("[ERROR] Error al configurar cloudinary:", str(e))
             CLOUDINARY_STORAGE = {}
     else:
         msg = "CLOUDINARY_URL malformada. Use: cloudinary://<api_key>:<api_secret>@<cloud_name>"
         if DEBUG:
-            print(f"⚠️  {msg} Falling back to local FileSystemStorage because DEBUG=True.")
+            print(f"[WARN] {msg} Falling back to local FileSystemStorage because DEBUG=True.")
             DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
             MEDIA_URL = '/media/'
         else:
@@ -268,7 +268,7 @@ else:
     )
     if DEBUG:
         # En desarrollo permitimos fallback local, pero lo notificamos claramente
-        print("⚠️  " + msg + " Falling back to local FileSystemStorage because DEBUG=True.")
+        print("[WARN] " + msg + " Falling back to local FileSystemStorage because DEBUG=True.")
         DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
         MEDIA_URL = '/media/'
     else:

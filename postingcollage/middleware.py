@@ -8,7 +8,7 @@ import traceback
 logger = logging.getLogger('django')
 
 # Diagnostic startup print to help capture deployment-time context
-print("🛡️  ErrorLoggingMiddleware loaded")
+print("[OK] ErrorLoggingMiddleware loaded")
 
 
 class ErrorLoggingMiddleware:
