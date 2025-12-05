@@ -247,9 +247,10 @@ if CLOUDINARY_URL:
                 CLOUDINARY_STORAGE['MEDIA_URL'] = MEDIA_URL
             except (ValueError, AttributeError, TypeError):
                 MEDIA_URL = '/media/'
-            # Prints de diagnóstico (NO exponen el api_secret)
-            print(f"[OK] CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
-            print(f"[OK] DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
+            # Prints de diagnóstico (NO exponen el api_secret) - solo en DEBUG o si VERBOSE_STARTUP=1
+            if DEBUG or os.environ.get("VERBOSE_STARTUP") == "1":
+                print(f"[OK] CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
+                print(f"[OK] DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
         except (ValueError, AttributeError, TypeError) as e:
             print("[ERROR] Error al configurar cloudinary:", str(e))
             CLOUDINARY_STORAGE = {}

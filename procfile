@@ -1,1 +1,1 @@
-web: gunicorn postingcollage.wsgi:application --log-file -
+web: gunicorn postingcollage.wsgi:application --log-file - --timeout 120 --workers 2
