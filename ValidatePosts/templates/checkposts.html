@@ -53,7 +53,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ post.title }}</h5>
                         <p class="card-text text-muted">
-                            {{ post.body|truncatechars:130 }}
+                            {{ post.body|striptags|truncatechars:130 }}
                         </p>
                     </div>
 
