@@ -9,7 +9,11 @@
 
                 {% for post in posts %}
                 <div class="col-md-6 col-lg-4">
-                    <a href="{% url 'actualizar' post.id %}" class="card shadow-sm h-100">
+                    <a href="{% url 'actualizar' post.id %}" class="card shadow-sm h-100 position-relative">
+
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-secondary">ID: {{ post.id }}</span>
+                        </div>
 
                         {% if post.imgs %}
                         <img src="{{ post.imgs.url }}" class="card-img-top" alt="Imagen del post">

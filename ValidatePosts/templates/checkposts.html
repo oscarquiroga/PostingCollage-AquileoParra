@@ -30,10 +30,14 @@
     <div class="row g-4">
 
         {% for post in posts %}
-        <div class="col-12">
+                <div class="col-12">
             <a href="{% url 'review' post.id %}" class="text-decoration-none text-dark">
 
-                <div class="card shadow-sm hover-shadow" style="transition: 0.2s;">
+                <div class="card shadow-sm hover-shadow position-relative" style="transition: 0.2s;">
+
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-secondary">ID: {{ post.id }}</span>
+                    </div>
                     
                     <!-- Header -->
                     <div class="card-header d-flex justify-content-between align-items-center">
