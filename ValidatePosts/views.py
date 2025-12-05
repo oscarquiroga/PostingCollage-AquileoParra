@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from .forms import PostForm, ReviewPostForm, StudentReviewForm
 from .models import Post
+import cloudinary.uploader
 
 
 @login_required
@@ -12,6 +13,24 @@ def createposts_view(request):
         if fm.is_valid():
             post = fm.save(commit=False)
             post.user = request.user
+            # Handle manual upload of files to Cloudinary to avoid CloudinaryField pre_save signature issues
+            try:
+                # Image field
+                img_file = request.FILES.get('imgs')
+                if img_file:
+                    res = cloudinary.uploader.upload(img_file, folder='posts/images', resource_type='image', type='upload')
+                    # Store the public_id in the CloudinaryField (prevents double-upload)
+                    post.imgs = res.get('public_id')
+
+                # Attachment field (raw files)
+                attachment_file = request.FILES.get('attachment')
+                if attachment_file:
+                    res_att = cloudinary.uploader.upload(attachment_file, folder='posts/files', resource_type='auto', type='upload')
+                    post.attachment = res_att.get('public_id')
+            except Exception:
+                # If cloudinary upload fails here, raise so the error appears in logs
+                raise
+
             post.save()
             return redirect('home')
     else:
