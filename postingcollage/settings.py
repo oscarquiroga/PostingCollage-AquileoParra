@@ -195,35 +195,72 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Configuración de Cloudinary (REQUIERE `CLOUDINARY_URL` en producción)
 # Use una sola variable de entorno con el formato:
 #   CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
+#
+# NOTA: cloudinary.config() debe ser invocado explícitamente con los parámetros
+# parseados desde CLOUDINARY_URL para asegurar que están disponibles en settings.py
+# (no se puede confiar en que el auto-config ocurra antes).
+
+def _parse_cloudinary_url():
+    """Parse CLOUDINARY_URL from environment and return (cloud_name, api_key, api_secret) or (None, None, None)."""
+    cloudinary_url = os.environ.get("CLOUDINARY_URL", "")
+    if not cloudinary_url.startswith("cloudinary://"):
+        return None, None, None
+    # Formato: cloudinary://api_key:api_secret@cloud_name
+    try:
+        # Remover prefijo
+        url_part = cloudinary_url.replace("cloudinary://", "", 1)
+        # Dividir en credenciales y cloud_name
+        creds_part, cn = url_part.rsplit("@", 1)
+        ak, as_ = creds_part.split(":", 1)
+        return cn, ak, as_
+    except (ValueError, AttributeError):
+        return None, None, None
+
+
 CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
 
 # Forzar uso de CLOUDINARY_URL cuando DEBUG=False (producción)
 if CLOUDINARY_URL:
-    # cloudinary.config() leerá CLOUDINARY_URL automáticamente
-    cloudinary.config(secure=True)
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    try:
-        cfg = cloudinary.config()
-        # No imprimimos secretos; mostramos solo lo necesario para depuración
-        masked_key = (cfg.api_key[:4] + '...' + cfg.api_key[-4:]) if cfg.api_key else 'None'
-        CLOUDINARY_STORAGE = {
-            'CLOUD_NAME': cfg.cloud_name,
-            'API_KEY': cfg.api_key,
-            'API_SECRET': '***MASKED***',
-            'SECURE': True,
-        }
-        # Poner MEDIA_URL al CDN de Cloudinary para que CKEditor y templates apunten al CDN
+    cloud_name, api_key, api_secret = _parse_cloudinary_url()
+    if cloud_name and api_key and api_secret:
+        # Configurar cloudinary explícitamente con los valores parseados
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=api_key,
+            api_secret=api_secret,
+            secure=True
+        )
+        DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
         try:
-            MEDIA_URL = f"https://res.cloudinary.com/{cfg.cloud_name}/"
-            CLOUDINARY_STORAGE['MEDIA_URL'] = MEDIA_URL
-        except Exception:
+            cfg = cloudinary.config()
+            # No imprimimos secretos; mostramos solo lo necesario para depuración
+            masked_key = (cfg.api_key[:4] + '...' + cfg.api_key[-4:]) if cfg.api_key else 'None'
+            CLOUDINARY_STORAGE = {
+                'CLOUD_NAME': cfg.cloud_name,
+                'API_KEY': cfg.api_key,
+                'API_SECRET': '***MASKED***',
+                'SECURE': True,
+            }
+            # Poner MEDIA_URL al CDN de Cloudinary para que CKEditor y templates apunten al CDN
+            try:
+                MEDIA_URL = f"https://res.cloudinary.com/{cfg.cloud_name}/"
+                CLOUDINARY_STORAGE['MEDIA_URL'] = MEDIA_URL
+            except (ValueError, AttributeError, TypeError):
+                MEDIA_URL = '/media/'
+            # Prints de diagnóstico (NO exponen el api_secret)
+            print(f"✅ CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
+            print(f"✅ DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
+        except (ValueError, AttributeError, TypeError) as e:
+            print("❌ Error al configurar cloudinary:", str(e))
+            CLOUDINARY_STORAGE = {}
+    else:
+        msg = "CLOUDINARY_URL malformada. Use: cloudinary://<api_key>:<api_secret>@<cloud_name>"
+        if DEBUG:
+            print(f"⚠️  {msg} Falling back to local FileSystemStorage because DEBUG=True.")
+            DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
             MEDIA_URL = '/media/'
-        # Prints de diagnóstico (NO exponen el api_secret)
-        print(f"✅ CLOUDINARY_URL encontrada. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
-        print(f"✅ DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
-    except Exception as e:
-        print("❌ Error al configurar cloudinary:", str(e))
-        CLOUDINARY_STORAGE = {}
+        else:
+            raise RuntimeError(msg)
 else:
     msg = (
         "CLOUDINARY_URL not set. Configure an environment variable: "
