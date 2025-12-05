@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
-from postingcollage import debug_views, ckeditor_handler
+from postingcollage import ckeditor_handler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,8 +29,7 @@ urlpatterns = [
     # Override the default CKEditor upload endpoint with our custom handler
     path('ckeditor5/image_upload/', ckeditor_handler.ckeditor_upload),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
-    # Diagnostic URL: temporary endpoint to test Cloudinary upload from runtime
-    re_path(r'^__debug__/cloudinary_test_upload/$', debug_views.cloudinary_test_upload),
+    # (production) ckeditor upload handler is registered above
 ]
 
 if settings.DEBUG:

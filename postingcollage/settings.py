@@ -219,62 +219,32 @@ def _parse_cloudinary_url():
 
 
 CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
-
-# Forzar uso de CLOUDINARY_URL cuando DEBUG=False (producción)
-if CLOUDINARY_URL:
-    cloud_name, api_key, api_secret = _parse_cloudinary_url()
-    if cloud_name and api_key and api_secret:
-        # Configurar cloudinary explícitamente con los valores parseados
-        cloudinary.config(
-            cloud_name=cloud_name,
-            api_key=api_key,
-            api_secret=api_secret,
-            secure=True
-        )
-        DEFAULT_FILE_STORAGE = "postingcollage.storage.CloudinaryMediaStorage"
-        try:
-            cfg = cloudinary.config()
-            # No imprimimos secretos; mostramos solo lo necesario para depuración
-            masked_key = (cfg.api_key[:4] + '...' + cfg.api_key[-4:]) if cfg.api_key else 'None'
-            CLOUDINARY_STORAGE = {
-                'CLOUD_NAME': cfg.cloud_name,
-                'API_KEY': cfg.api_key,
-                'API_SECRET': '***MASKED***',
-                'SECURE': True,
-            }
-            # Poner MEDIA_URL al CDN de Cloudinary para que CKEditor y templates apunten al CDN
-            try:
-                MEDIA_URL = f"https://res.cloudinary.com/{cfg.cloud_name}/"
-                CLOUDINARY_STORAGE['MEDIA_URL'] = MEDIA_URL
-            except (ValueError, AttributeError, TypeError):
-                MEDIA_URL = '/media/'
-            # Prints de diagnóstico (NO exponen el api_secret) - solo en DEBUG o si VERBOSE_STARTUP=1
-            if DEBUG or os.environ.get("VERBOSE_STARTUP") == "1":
-                print(f"[OK] CLOUDINARY_URL parseada correctamente. CLOUD_NAME={cfg.cloud_name}. API_KEY={masked_key}")
-                print(f"[OK] DEFAULT_FILE_STORAGE set to {DEFAULT_FILE_STORAGE}")
-        except (ValueError, AttributeError, TypeError) as e:
-            print("[ERROR] Error al configurar cloudinary:", str(e))
-            CLOUDINARY_STORAGE = {}
-    else:
-        msg = "CLOUDINARY_URL malformada. Use: cloudinary://<api_key>:<api_secret>@<cloud_name>"
-        if DEBUG:
-            print(f"[WARN] {msg} Falling back to local FileSystemStorage because DEBUG=True.")
-            DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-            MEDIA_URL = '/media/'
-        else:
-            raise RuntimeError(msg)
-else:
-    msg = (
+if not CLOUDINARY_URL:
+    raise RuntimeError(
         "CLOUDINARY_URL not set. Configure an environment variable: "
         "CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>"
     )
-    if DEBUG:
-        # En desarrollo permitimos fallback local, pero lo notificamos claramente
-        print("[WARN] " + msg + " Falling back to local FileSystemStorage because DEBUG=True.")
-        DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-        MEDIA_URL = '/media/'
-    else:
-        # En producción debe existir CLOUDINARY_URL: fallar rápido para ver el error en deploy
-        raise RuntimeError(msg)
+
+# Parse and require proper CLOUDINARY_URL format
+cloud_name, api_key, api_secret = _parse_cloudinary_url()
+if not (cloud_name and api_key and api_secret):
+    raise RuntimeError("CLOUDINARY_URL malformada. Use: cloudinary://<api_key>:<api_secret>@<cloud_name>")
+
+# Configure cloudinary SDK for the application runtime
+cloudinary.config(cloud_name=cloud_name, api_key=api_key, api_secret=api_secret, secure=True)
+
+# Use Cloudinary as the default storage in production
+DEFAULT_FILE_STORAGE = "postingcollage.storage.CloudinaryMediaStorage"
+
+# Minimal CLOUDINARY_STORAGE dict for third-party integrations; secret remains masked
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': cloud_name,
+    'API_KEY': api_key,
+    'API_SECRET': '***MASKED***',
+    'SECURE': True,
+    'MEDIA_URL': f"https://res.cloudinary.com/{cloud_name}/",
+}
+
+MEDIA_URL = CLOUDINARY_STORAGE['MEDIA_URL']
 
 MEDIA_ROOT = BASE_DIR / 'media'

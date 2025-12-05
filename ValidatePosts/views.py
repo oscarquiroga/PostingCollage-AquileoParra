@@ -5,11 +5,15 @@ from .forms import PostForm, ReviewPostForm, StudentReviewForm
 from .models import Post
 import cloudinary.uploader
 import cloudinary
-from django.contrib import messages
 
 
 @login_required
 def createposts_view(request):
+    # Fail fast in production if Cloudinary is not properly configured
+    cfg = cloudinary.config()
+    if not (cfg and getattr(cfg, 'api_secret', None)):
+        raise RuntimeError("Cloudinary not configured. Ensure CLOUDINARY_URL is set in the environment.")
+
     if request.method == 'POST':
         fm = PostForm(request.POST, request.FILES)
         if fm.is_valid():
@@ -17,41 +21,22 @@ def createposts_view(request):
             post.user = request.user
             # Handle manual upload of files to Cloudinary to avoid CloudinaryField pre_save signature issues
             try:
-                # Quick diagnostic: ensure Cloudinary config is present
-                cfg = cloudinary.config()
-                if not (cfg and cfg.cloud_name and cfg.api_key and cfg.api_secret):
-                    messages.error(request, "Cloudinary no está configurado correctamente en el entorno. Revisa la variable CLOUDINARY_URL en producción.")
-                    return render(request, 'createposts.html', {'form': fm})
+                # cloudinary.config() was validated at function start; proceed with uploads
                 # Image field
                 img_file = request.FILES.get('imgs')
                 if img_file:
-                    try:
-                        res = cloudinary.uploader.upload(img_file, folder='posts/images', resource_type='image', type='upload')
-                        # Store the public_id in the CloudinaryField (prevents double-upload)
-                        post.imgs = res.get('public_id')
-                    except Exception as e:
-                        # Log a concise diagnostic (do NOT log api_secret)
-                        print(f"Cloudinary upload failed for image. cloud_name={cfg.cloud_name}, api_key_present={bool(cfg.api_key)}")
-                        print(str(e))
-                        messages.error(request, "Error al subir la imagen a Cloudinary. Revisa las credenciales en el servidor.")
-                        return render(request, 'createposts.html', {'form': fm})
+                    res = cloudinary.uploader.upload(img_file, folder='posts/images', resource_type='image', type='upload')
+                    # Store the public_id in the CloudinaryField (prevents double-upload)
+                    post.imgs = res.get('public_id')
 
                 # Attachment field (raw files)
                 attachment_file = request.FILES.get('attachment')
                 if attachment_file:
-                    try:
-                        res_att = cloudinary.uploader.upload(attachment_file, folder='posts/files', resource_type='auto', type='upload')
-                        post.attachment = res_att.get('public_id')
-                    except Exception as e:
-                        print(f"Cloudinary upload failed for attachment. cloud_name={cfg.cloud_name}, api_key_present={bool(cfg.api_key)}")
-                        print(str(e))
-                        messages.error(request, "Error al subir el archivo adjunto a Cloudinary. Revisa las credenciales en el servidor.")
-                        return render(request, 'createposts.html', {'form': fm})
+                    res_att = cloudinary.uploader.upload(attachment_file, folder='posts/files', resource_type='auto', type='upload')
+                    post.attachment = res_att.get('public_id')
             except Exception as e:
-                # Catch any unexpected exception during the upload flow
-                print("Unexpected error during Cloudinary upload flow:", str(e))
-                messages.error(request, "Ocurrió un error inesperado al procesar los archivos. Revisa los logs del servidor.")
-                return render(request, 'createposts.html', {'form': fm})
+                # In production, raise to surface the error to logs/monitoring
+                raise
 
             post.save()
             return redirect('home')

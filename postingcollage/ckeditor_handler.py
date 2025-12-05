@@ -11,7 +11,6 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import cloudinary.uploader
 import cloudinary
-import os
 
 logger = logging.getLogger('django')
 
@@ -39,34 +38,20 @@ def ckeditor_upload(request):
         # Read file content
         file_content = uploaded_file.read()
         
-        # Ensure Cloudinary SDK is configured in this process (helps in some PaaS cases)
+        # Ensure Cloudinary SDK appears configured in this process
         try:
             cfg = cloudinary.config()
         except Exception:
             cfg = None
 
         if not (cfg and getattr(cfg, 'api_secret', None)):
-            # Attempt to parse CLOUDINARY_URL environment variable as a fallback
-            cloudinary_url = os.environ.get('CLOUDINARY_URL')
-            if cloudinary_url and cloudinary_url.startswith('cloudinary://'):
-                try:
-                    # Format: cloudinary://api_key:api_secret@cloud_name
-                    url_part = cloudinary_url.replace('cloudinary://', '', 1)
-                    creds_part, cn = url_part.rsplit('@', 1)
-                    ak, as_ = creds_part.split(':', 1)
-                    cloudinary.config(cloud_name=cn, api_key=ak, api_secret=as_, secure=True)
-                    cfg = cloudinary.config()
-                except Exception as e:
-                    logger.error(f"[CKEditor Upload] Failed to parse CLOUDINARY_URL: {str(e)}")
+            logger.error('[CKEditor Upload] Cloudinary SDK is not configured in this process')
+            return JsonResponse({'error': {'message': 'Cloudinary not configured on server.'}}, status=500)
 
         # Upload to Cloudinary using the SDK directly. This bypasses django-cloudinary-storage.
         try:
-            # Log non-sensitive config diagnostic
-            try:
-                cfg = cloudinary.config()
-                logger.info(f"[CKEditor Upload] cloud_name={getattr(cfg, 'cloud_name', None)}, api_key_present={bool(getattr(cfg, 'api_key', None))}")
-            except Exception:
-                logger.info("[CKEditor Upload] cloudinary.config() unavailable")
+            # Minimal non-sensitive diagnostic log
+            logger.info(f"[CKEditor Upload] cloud_name={getattr(cfg, 'cloud_name', None)}")
 
             result = cloudinary.uploader.upload(
                 file_content,
