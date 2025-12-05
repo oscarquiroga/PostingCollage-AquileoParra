@@ -129,7 +129,7 @@ CKEDITOR_5_CONFIGS = {
 }
 
 
-CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+CKEDITOR_5_FILE_STORAGE = "postingcollage.storage.CloudinaryMediaStorage"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any"
 
 
@@ -180,10 +180,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-if not DEBUG:
-    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT must always be defined, regardless of DEBUG
+# (required by Django's staticfiles app)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+if not DEBUG:
     # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
     # and renames the files with unique names for each version to support long-term caching
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -230,7 +231,7 @@ if CLOUDINARY_URL:
             api_secret=api_secret,
             secure=True
         )
-        DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+        DEFAULT_FILE_STORAGE = "postingcollage.storage.CloudinaryMediaStorage"
         try:
             cfg = cloudinary.config()
             # No imprimimos secretos; mostramos solo lo necesario para depuración
