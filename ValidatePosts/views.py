@@ -51,11 +51,21 @@ def myposts_view(request):
 @login_required
 def revisiones_view(request):
     estado = request.GET.get("estado", None)
+    post_id = request.GET.get("post_id", None)
 
     posts = Post.objects.filter().order_by("-id")
 
     if estado in ["pending", "approved", "rejected"]:
         posts = posts.filter(status=estado)
+
+    # If a post_id is provided, try to filter by that exact ID.
+    if post_id:
+        try:
+            pid = int(post_id)
+            posts = posts.filter(id=pid)
+        except (ValueError, TypeError):
+            # Invalid post_id value -> no results
+            posts = Post.objects.none()
 
     return render(request, "checkposts.html", {
         "posts": posts,
