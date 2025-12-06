@@ -141,8 +141,14 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "xazadox@gmail.com"
-EMAIL_HOST_PASSWORD = "zhvh fave ipcg bweo"
+# Read SMTP credentials from environment for production
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+# Optional: allow overriding other email settings via env
+EMAIL_HOST = os.environ.get('EMAIL_HOST', EMAIL_HOST)
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', EMAIL_PORT))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 
 
 # Password validation
