@@ -1,5 +1,6 @@
 from django.core.mail import send_mail
 from django.contrib import messages
+import logging
 from .forms import SupportForm
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
@@ -87,12 +88,19 @@ def support_view(request):
                 f"📝 *Descripción:*\n{description}"
             )
 
-            send_mail(
-                subject=f"[SOPORTE] {title}",
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=["xazadox@gmail.com"],
-            )
+            logger = logging.getLogger('django')
+            try:
+                send_mail(
+                    subject=f"[SOPORTE] {title}",
+                    message=message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=["xazadox@gmail.com"],
+                )
+            except Exception as e:
+                # Log full exception for server-side diagnostics, but show friendly message to user
+                logger.exception("Error sending support email")
+                messages.error(request, "No se pudo enviar el mensaje de soporte en este momento. Intenta de nuevo más tarde.")
+                return redirect("support")
 
             messages.success(request, "Tu mensaje de soporte ha sido enviado correctamente.")
             return redirect("support")
