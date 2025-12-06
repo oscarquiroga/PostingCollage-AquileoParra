@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
-from postingcollage import ckeditor_handler, error_views
+from postingcollage import ckeditor_handler, diagnostic_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,7 +29,8 @@ urlpatterns = [
     # Override the default CKEditor upload endpoint with our custom handler
     path('ckeditor5/image_upload/', ckeditor_handler.ckeditor_upload),
     path("ckeditor5/", include('django_ckeditor_5.urls')),
-    # (production) ckeditor upload handler is registered above
+    # Diagnostic endpoints (protected by DIAGNOSTIC_TOKEN env var)
+    path('diagnostic/test-smtp/', diagnostic_views.test_smtp_connection, name='test_smtp'),
 ]
 
 # Custom error handlers for production (redirect to home on errors)
