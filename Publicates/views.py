@@ -1,6 +1,10 @@
 from django.core.mail import send_mail
 from django.contrib import messages
 import logging
+import os
+import json
+import urllib.request
+import urllib.error
 from .forms import SupportForm
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
@@ -89,6 +93,44 @@ def support_view(request):
             )
 
             logger = logging.getLogger('django')
+
+            # Prefer SendGrid HTTP API if SENDGRID_API_KEY is configured (works on Render)
+            sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+            if sendgrid_api_key:
+                try:
+                    url = 'https://api.sendgrid.com/v3/mail/send'
+                    payload = {
+                        'personalizations': [{
+                            'to': [{'email': 'xazadox@gmail.com'}],
+                            'subject': f"[SOPORTE] {title}"
+                        }],
+                        'from': {'email': settings.EMAIL_HOST_USER},
+                        'content': [{'type': 'text/plain', 'value': message}]
+                    }
+                    data = json.dumps(payload).encode('utf-8')
+                    req = urllib.request.Request(url, data=data, method='POST')
+                    req.add_header('Authorization', f'Bearer {sendgrid_api_key}')
+                    req.add_header('Content-Type', 'application/json')
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        status = resp.getcode()
+                        if 200 <= status < 300:
+                            messages.success(request, "Tu mensaje de soporte ha sido enviado correctamente.")
+                            return redirect('support')
+                        else:
+                            logger.error(f"SendGrid returned status {status}")
+                            messages.error(request, "No se pudo enviar el mensaje de soporte. Intenta de nuevo más tarde.")
+                            return redirect('support')
+                except urllib.error.HTTPError as e:
+                    body = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
+                    logger.exception(f"SendGrid HTTPError: {body}")
+                    messages.error(request, "No se pudo enviar el mensaje de soporte (error de proveedor).")
+                    return redirect('support')
+                except Exception as e:
+                    logger.exception("Unexpected error sending support email via SendGrid")
+                    messages.error(request, "No se pudo enviar el mensaje de soporte en este momento. Intenta de nuevo más tarde.")
+                    return redirect('support')
+
+            # Fallback to Django SMTP send_mail
             try:
                 send_mail(
                     subject=f"[SOPORTE] {title}",
@@ -98,7 +140,7 @@ def support_view(request):
                 )
             except Exception as e:
                 # Log full exception for server-side diagnostics, but show friendly message to user
-                logger.exception("Error sending support email")
+                logger.exception("Error sending support email via SMTP")
                 messages.error(request, "No se pudo enviar el mensaje de soporte en este momento. Intenta de nuevo más tarde.")
                 return redirect("support")
 
