@@ -77,12 +77,12 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/publicaciones/revisiones">Revisiones</a>
                 </li>
+                {% endif %}
+                
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/soporte">Soporte</a>
                 </li>
-                {% endif %}
-
-                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/publicaciones/nueva-publicacion">Crear Publicación</a>
                 </li>
